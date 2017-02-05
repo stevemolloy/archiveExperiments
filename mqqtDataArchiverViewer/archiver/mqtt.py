@@ -24,7 +24,9 @@ def on_connect(client, userdata, flags, rc):
         print "Connection failed"
 
 def on_message(client, userdata, msg):
-    print msg.topic, msg.payload
+    if 'itsGeiger01/get/cpm' in msg.topic:
+        jsonPayload = json.loads(msg.payload)
+        print int(jsonPayload['cpmGet'])
 
 client.on_connect = on_connect
 client.on_message = on_message
