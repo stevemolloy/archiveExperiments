@@ -25,11 +25,23 @@ def startMQTT():
         if rc == 0:
             client.subscribe('itsGeiger01/get/#')
             client.subscribe('itsWaterSystem/get')
+            client.subscribe('itsSolarMeter01/get/cond')
             print "Connected!"
         else:
             print "Connection failed"
 
     def on_message(client, userdata, msg):
+        from .models import TestStandEnvironment
+        if 'itsSolarMeter01/get/cond' in msg.topic:
+            ts = timezone.now()
+            jsonPayload = json.loads(msg.payload)
+            TestStandEnvironment(
+                    light = float(jsonPayload['photoGet']),
+                    light_averaged = float(jsonPayload['photoAvgGet']),
+                    temperature = float(jsonPayload['tempGet']),
+                    timestamp = ts,
+                    ).save()
+
         if 'itsGeiger01/get/cpm' in msg.topic:
             from .models import cpm
             ts = timezone.now()
@@ -67,8 +79,8 @@ def startMQTT():
             InputWaterSystem(
                     input_flow = None,
                     input_temp = float(jsonPayload['inputTemp']),
-                    timestamp = ts,)
-            val.save()
+                    timestamp = ts,
+                    ).save()
 
     client.on_connect = on_connect
     client.on_message = on_message
