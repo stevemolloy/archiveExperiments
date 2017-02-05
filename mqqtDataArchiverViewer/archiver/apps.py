@@ -34,9 +34,8 @@ def startMQTT():
             from .models import cpm
             ts = timezone.now()
             jsonPayload = json.loads(msg.payload)
-            val = cpm(measured_val = int(jsonPayload['cpmGet']), timestamp = ts)
-            val.save()
-            
+            cpm(measured_val = int(jsonPayload['cpmGet']), timestamp = ts).save()
+
         if 'itsWaterSystem/get' in msg.topic:
             from .models import KlystronBodyWaterSystem
             from .models import ModOilTankWaterSystem
@@ -45,27 +44,27 @@ def startMQTT():
             from .models import InputWaterSystem
             ts = timezone.now()
             jsonPayload = json.loads(msg.payload)
-            val = KlystronBodyWaterSystem(
+            KlystronBodyWaterSystem(
                     body_flow = float(jsonPayload['body']),
                     body_temp = None,
-                    timestamp = ts,)
-            val.save()
-            val = ModOilTankWaterSystem(
+                    timestamp = ts,
+                    ).save()
+            ModOilTankWaterSystem(
                     tank_flow = float(jsonPayload['tank']),
                     tank_temp = None,
-                    timestamp = ts,)
-            val.save()
-            val = KlystronCollectorWaterSystem(
+                    timestamp = ts,
+                    ).save()
+            KlystronCollectorWaterSystem(
                     collector_flow = float(jsonPayload['collector']),
                     collector_temp = None,
-                    timestamp = ts,)
-            val.save()
-            val = KlystronSolenoidWaterSystem(
+                    timestamp = ts,
+                    ).save()
+            KlystronSolenoidWaterSystem(
                     solenoid_flow = float(jsonPayload['solenoid']),
                     solenoid_temp = None,
-                    timestamp = ts,)
-            val.save()
-            val = InputWaterSystem(
+                    timestamp = ts,
+                    ).save()
+            InputWaterSystem(
                     input_flow = None,
                     input_temp = float(jsonPayload['inputTemp']),
                     timestamp = ts,)

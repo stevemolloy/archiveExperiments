@@ -41,3 +41,9 @@ class InputWaterSystem(models.Model):
     input_flow = models.FloatField(null=True)
     input_temp = models.FloatField()
     timestamp = models.DateTimeField()
+
+class TestStandEnvironment(models.Model):
+    light = models.FloatField()
+    light_averaged = models.FloatField()
+    temperature = models.FloatField()
+    timestamp = models.DateTimeField()
