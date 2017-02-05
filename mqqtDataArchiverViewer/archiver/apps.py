@@ -7,7 +7,7 @@ import paho.mqtt.client as mqtt
 import json
 import time
 
-def startMQTT(cpm):
+def startMQTT():
     with open('itsmqttbroker.dat', 'r') as brokerFile:
         jsonBrokerObj = json.load(brokerFile)
     brokerAddress = jsonBrokerObj['broker'].encode().replace('tcp://', '')
@@ -24,16 +24,52 @@ def startMQTT(cpm):
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
             client.subscribe('itsGeiger01/get/#')
+            client.subscribe('itsWaterSystem/get')
             print "Connected!"
         else:
             print "Connection failed"
 
     def on_message(client, userdata, msg):
         if 'itsGeiger01/get/cpm' in msg.topic:
+            from .models import cpm
+            ts = timezone.now()
             jsonPayload = json.loads(msg.payload)
-            val = cpm(measured_val = int(jsonPayload['cpmGet']), timestamp = timezone.now())
+            val = cpm(measured_val = int(jsonPayload['cpmGet']), timestamp = ts)
             val.save()
-            print len(cpm.objects.all())
+            
+        if 'itsWaterSystem/get' in msg.topic:
+            from .models import KlystronBodyWaterSystem
+            from .models import ModOilTankWaterSystem
+            from .models import KlystronCollectorWaterSystem
+            from .models import KlystronSolenoidWaterSystem
+            from .models import InputWaterSystem
+            ts = timezone.now()
+            jsonPayload = json.loads(msg.payload)
+            val = KlystronBodyWaterSystem(
+                    body_flow = float(jsonPayload['body']),
+                    body_temp = None,
+                    timestamp = ts,)
+            val.save()
+            val = ModOilTankWaterSystem(
+                    tank_flow = float(jsonPayload['tank']),
+                    tank_temp = None,
+                    timestamp = ts,)
+            val.save()
+            val = KlystronCollectorWaterSystem(
+                    collector_flow = float(jsonPayload['collector']),
+                    collector_temp = None,
+                    timestamp = ts,)
+            val.save()
+            val = KlystronSolenoidWaterSystem(
+                    solenoid_flow = float(jsonPayload['solenoid']),
+                    solenoid_temp = None,
+                    timestamp = ts,)
+            val.save()
+            val = InputWaterSystem(
+                    input_flow = None,
+                    input_temp = float(jsonPayload['inputTemp']),
+                    timestamp = ts,)
+            val.save()
 
     client.on_connect = on_connect
     client.on_message = on_message
@@ -49,5 +85,4 @@ class ArchiverConfig(AppConfig):
     name = 'archiver'
 
     def ready(self):
-        from .models import cpm
-        startMQTT(cpm)
+        startMQTT()
