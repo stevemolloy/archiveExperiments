@@ -2,6 +2,7 @@ import json
 import time
 from threading import Thread
 import paho.mqtt.client as mqtt
+from django.utils import timezone
 
 with open('itsmqttbroker.dat', 'r') as brokerFile:
     jsonBrokerObj = json.load(brokerFile)
@@ -24,9 +25,12 @@ def on_connect(client, userdata, flags, rc):
         print "Connection failed"
 
 def on_message(client, userdata, msg):
+    from .models import cpm
     if 'itsGeiger01/get/cpm' in msg.topic:
         jsonPayload = json.loads(msg.payload)
-        print int(jsonPayload['cpmGet'])
+        val = cpm(measured_val = int(jsonPayload['cpmGet']), timestamp = timezone.now())
+        val.save()
+        print cpm.objects.all()
 
 client.on_connect = on_connect
 client.on_message = on_message
