@@ -25,9 +25,10 @@ def startMQTT():
 
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            from .models import registry
-            for sig in (x for x in registry.objects.all() if x.archival_active):
-                client.subscribe(sig.signal)
+            client.subscribe('#')
+            # from .models import registry
+            # for sig in (x for x in registry.objects.all()):
+            #     client.subscribe(sig.signal)
             print "Connected!"
         else:
             print "Connection failed"
