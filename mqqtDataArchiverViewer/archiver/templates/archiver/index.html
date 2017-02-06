@@ -1,0 +1,9 @@
+{% if latest_signal_list %}
+    <ul>
+    {% for sig in latest_signal_list %}
+        <li><a href="/archiver/{{ sig.id }}/">{{ sig.signal }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No signals are registered.</p>
+{% endif %}
