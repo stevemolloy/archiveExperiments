@@ -4,7 +4,7 @@ from django.template import loader
 from .models import registry
 
 def index(request):
-    latest_signal_list = registry.objects.order_by('-first_registered')[:5]
+    latest_signal_list = registry.objects.order_by('first_registered')
     context = {'latest_signal_list': latest_signal_list,}
     return render(request, 'archiver/index.html', context)
 
