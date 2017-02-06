@@ -96,20 +96,6 @@ def startMQTT():
 
     return client
 
-def registrySigHandler(sender, instance, **kwargs):
-    print "RegSigHandler ", sender, instance
-
-def toggleRegistry():
-    from .models import registry
-    while True:
-        a = registry.objects.get(signal = 'itsWaterSystem/get')
-        if a.archival_active:
-            a.archival_active = False
-        else:
-            a.archival_active = True
-        a.save()
-        time.sleep(5)
-
 class ArchiverConfig(AppConfig):
     name = 'archiver'
 
@@ -117,9 +103,3 @@ class ArchiverConfig(AppConfig):
         client = startMQTT()
 
         client.loop_start()
-
-        post_save.connect(registrySigHandler, sender = archiver.models.registry)
-
-        toggle = Thread(target=toggleRegistry)
-        toggle.daemon = True
-        toggle.run()
