@@ -2,10 +2,12 @@ from __future__ import unicode_literals
 
 from django.apps import AppConfig
 from django.utils import timezone
+from django.db.models.signals import post_save
 from threading import Thread
 import paho.mqtt.client as mqtt
 import json
 import time
+import archiver
 
 def startMQTT():
     with open('itsmqttbroker.dat', 'r') as brokerFile:
@@ -90,10 +92,17 @@ def startMQTT():
             brokerPort,
             brokertimeout)
 
-    client.loop_start()
+    return client
+
+def registrySigHandler(sender, instance, **kwargs):
+    print sender, instance
 
 class ArchiverConfig(AppConfig):
     name = 'archiver'
 
     def ready(self):
-        startMQTT()
+        client = startMQTT()
+
+        client.loop_start()
+
+        post_save.connect(registrySigHandler, sender = archiver.models.registry)
