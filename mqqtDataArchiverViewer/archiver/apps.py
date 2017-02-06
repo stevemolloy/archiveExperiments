@@ -2,10 +2,12 @@ from __future__ import unicode_literals
 
 from django.apps import AppConfig
 from django.utils import timezone
+from django.db.models.signals import post_save
 from threading import Thread
 import paho.mqtt.client as mqtt
 import json
 import time
+import archiver
 
 def startMQTT():
     with open('itsmqttbroker.dat', 'r') as brokerFile:
@@ -23,15 +25,20 @@ def startMQTT():
 
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            client.subscribe('itsGeiger01/get/#')
-            client.subscribe('itsWaterSystem/get')
-            client.subscribe('itsSolarMeter01/get/cond')
+            client.subscribe('#')
+            # from .models import registry
+            # for sig in (x for x in registry.objects.all()):
+            #     client.subscribe(sig.signal)
             print "Connected!"
         else:
             print "Connection failed"
 
     def on_message(client, userdata, msg):
-        from .models import TestStandEnvironment
+        from .models import TestStandEnvironment, registry
+        registeredSigs = (sig.signal for sig in registry.objects.all()
+                                if sig.archival_active)
+        if not msg.topic in registeredSigs:
+            return
         if 'itsSolarMeter01/get/cond' in msg.topic:
             ts = timezone.now()
             jsonPayload = json.loads(msg.payload)
@@ -90,10 +97,32 @@ def startMQTT():
             brokerPort,
             brokertimeout)
 
-    client.loop_start()
+    return client
+
+def registrySigHandler(sender, instance, **kwargs):
+    print "RegSigHandler ", sender, instance
+
+def toggleRegistry():
+    from .models import registry
+    while True:
+        a = registry.objects.get(signal = 'itsWaterSystem/get')
+        if a.archival_active:
+            a.archival_active = False
+        else:
+            a.archival_active = True
+        a.save()
+        time.sleep(5)
 
 class ArchiverConfig(AppConfig):
     name = 'archiver'
 
     def ready(self):
-        startMQTT()
+        client = startMQTT()
+
+        client.loop_start()
+
+        post_save.connect(registrySigHandler, sender = archiver.models.registry)
+
+        toggle = Thread(target=toggleRegistry)
+        toggle.daemon = True
+        toggle.run()
