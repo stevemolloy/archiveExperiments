@@ -1,20 +1,26 @@
 {% if latest_signal_list %}
-    <table>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Signal</th>
+      <th>Archival Active?</th>
+      <th>First Registered</th>
+    </tr>
+    {% for sig in latest_signal_list %}
       <tr>
-        <th>ID</th>
-        <th>Signal</th>
-        <th>Archival Active?</th>
-        <th>First Registered</th>
+        <td>{{ sig.id }}</td>
+        <td><a href="{% url 'detail' sig.id %}">{{ sig.signal }}</a></td>
+        <td>{{ sig.archival_active }}</td>
+        <td>{{ sig.first_registered }}</td>
       </tr>
-      {% for sig in latest_signal_list %}
-        <tr>
-          <td>{{ sig.id }}</td>
-          <td><a href="{% url 'detail' sig.id %}">{{ sig.signal }}</a></td>
-          <td>{{ sig.archival_active }}</td>
-          <td>{{ sig.first_registered }}</td>
-        </tr>
-      {% endfor %}
-    </table>
+    {% endfor %}
+  </table>
+  <br>
+  <form action="{% url 'updateRegistry' %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Update Registry" />
+  </form>
 {% else %}
     <p>No signals are registered.</p>
 {% endif %}
