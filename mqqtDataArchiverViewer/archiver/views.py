@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from .models import registry
 from .forms import ActiveSignalForm
@@ -14,4 +14,12 @@ def signalDetail(request, signal_id):
     return HttpResponse("Some details about signal #{}".format(signal_id))
 
 def updateRegistry(request):
-    return HttpResponse(request.POST.getlist('choices'))
+    newRegistrySettings = [int(i) for i in request.POST.getlist('choices')]
+    for sig in registry.objects.all():
+        if sig.id in newRegistrySettings and not sig.archival_active:
+            sig.archival_active = True
+            sig.save()
+        elif not sig.id in newRegistrySettings and sig.archival_active:
+            sig.archival_active = False
+            sig.save()
+    return HttpResponseRedirect('/archiver')
