@@ -100,7 +100,7 @@ def registrySigHandler(sender, instance, **kwargs):
 def toggleRegistry():
     from .models import registry
     while True:
-        a = registry.objects.get(signal = 'itsSolarMeter01/get/cond')
+        a = registry.objects.get(signal = 'itsWaterSystem/get')
         if a.archival_active:
             a.archival_active = False
         else:
