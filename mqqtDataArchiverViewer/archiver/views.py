@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from .models import registry
 from .forms import ActiveSignalForm
+from django.utils import timezone
 
 def index(request):
     latest_signal_list = registry.objects.order_by('first_registered')
@@ -15,11 +16,16 @@ def signalDetail(request, signal_id):
 
 def updateRegistry(request):
     newRegistrySettings = [int(i) for i in request.POST.getlist('choices')]
+    ts = timezone.now()
     for sig in registry.objects.all():
-        if sig.id in newRegistrySettings and not sig.archival_active:
+        if (sig.id in newRegistrySettings) and (not sig.archival_active):
             sig.archival_active = True
+            sig.last_altered = ts
             sig.save()
-        elif not sig.id in newRegistrySettings and sig.archival_active:
+        elif (not sig.id in newRegistrySettings) and sig.archival_active:
             sig.archival_active = False
+            sig.last_altered = ts
             sig.save()
+        else:
+            print("Pass thru")
     return HttpResponseRedirect('/archiver')
