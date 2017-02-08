@@ -26,6 +26,4 @@ def updateRegistry(request):
             sig.archival_active = False
             sig.last_altered = ts
             sig.save()
-        else:
-            print("Pass thru")
     return HttpResponseRedirect('/archiver')
