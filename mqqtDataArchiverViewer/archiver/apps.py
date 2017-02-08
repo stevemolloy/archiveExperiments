@@ -36,6 +36,16 @@ def startMQTT():
                                 if sig.archival_active)
         if not msg.topic in registeredSigs:
             return
+        if 'itsPowerMeter01/get' in msg.topic:
+            from .models import RFPowerMeter
+            ts = timezone.now()
+            jsonPayload = json.loads(msg.payload)
+            RFPowerMeter(
+                    input1 = float(jsonPayload['power1']),
+                    input2 = float(jsonPayload['power2']),
+                    timestamp = ts,
+                    ).save()
+
         if 'itsSolarMeter01/get/cond' in msg.topic:
             from .models import TestStandEnvironment
             ts = timezone.now()
