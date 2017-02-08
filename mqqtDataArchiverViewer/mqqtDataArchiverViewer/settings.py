@@ -74,22 +74,32 @@ WSGI_APPLICATION = 'mqqtDataArchiverViewer.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'testDB',
-        'USER' : 'smolloy',
-        'PASSWORD' : '60hillview',
-        'HOST' : 'myfunkydb.cu6plvf0tank.eu-west-1.rds.amazonaws.com',
-        'PORT' : '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'testStandDB',
+#         'USER' : 'smolloy',
+#         'PASSWORD' : '60hillview',
+#         'HOST' : 'stevesdbinstance.cu6plvf0tank.eu-west-1.rds.amazonaws.com',
+#         'PORT' : '5432',
+#     }
+# }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'testDB',
+#         'USER' : 'smolloy',
+#         'PASSWORD' : '60hillview',
+#         'HOST' : 'myfunkydb.cu6plvf0tank.eu-west-1.rds.amazonaws.com',
+#         'PORT' : '5432',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
