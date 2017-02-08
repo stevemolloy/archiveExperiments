@@ -1,6 +1,4 @@
 import json
-import time
-from threading import Thread
 import paho.mqtt.client as mqtt
 from django.utils import timezone
 
