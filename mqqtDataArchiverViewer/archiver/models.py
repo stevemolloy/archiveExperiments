@@ -51,3 +51,8 @@ class TestStandEnvironment(models.Model):
     light_averaged = models.FloatField()
     temperature = models.FloatField()
     timestamp = models.DateTimeField()
+
+class RFPowerMeter(models.Model):
+    input1 = models.FloatField()
+    input2 = models.FloatField()
+    timestamp = models.DateTimeField()
