@@ -31,12 +31,13 @@ def startMQTT():
             print "Connection failed"
 
     def on_message(client, userdata, msg):
-        from .models import TestStandEnvironment, registry
+        from .models import registry
         registeredSigs = (sig.signal for sig in registry.objects.all()
                                 if sig.archival_active)
         if not msg.topic in registeredSigs:
             return
         if 'itsSolarMeter01/get/cond' in msg.topic:
+            from .models import TestStandEnvironment
             ts = timezone.now()
             jsonPayload = json.loads(msg.payload)
             TestStandEnvironment(
