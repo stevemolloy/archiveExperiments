@@ -18,7 +18,7 @@ def startMQTT():
 
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            client.subscribe('#')
+            # client.subscribe('#')
             print "Connected!"
         else:
             print "Connection failed"
