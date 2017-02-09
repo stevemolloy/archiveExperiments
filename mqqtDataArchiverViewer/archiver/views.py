@@ -2,13 +2,17 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from .models import registry
-from .forms import ActiveSignalForm
+from .forms import ActiveSignalForm, AddNewSignalForm
 from django.utils import timezone
 
 def index(request):
     latest_signal_list = registry.objects.order_by('first_registered')
-    form = ActiveSignalForm()
-    context = {'latest_signal_list': latest_signal_list, 'form': form}
+    activeSigForm = ActiveSignalForm()
+    addNewSigForm = AddNewSignalForm()
+    context = {'latest_signal_list': latest_signal_list,
+            'activeSigForm': activeSigForm,
+            'addNewSigForm': addNewSigForm,
+            }
     return render(request, 'archiver/index.html', context)
 
 def signalDetail(request, signal_id):
@@ -27,3 +31,6 @@ def updateRegistry(request):
             sig.last_altered = ts
             sig.save()
     return HttpResponseRedirect('/archiver')
+
+def addNewSignal(request):
+    return HttpResponse("Placeholder for addition of a new signal.")

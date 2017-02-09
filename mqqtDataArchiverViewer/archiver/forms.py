@@ -11,3 +11,6 @@ class ActiveSignalForm(forms.Form):
             sig.id for sig in registry.objects.order_by('first_registered')
             if sig.archival_active],
     )
+
+class AddNewSignalForm(forms.Form):
+    newsig = forms.CharField(label = 'MQTT Signal')

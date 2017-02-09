@@ -20,8 +20,13 @@
   <br>
   <form action="{% url 'updateRegistry' %}" method="post">
     {% csrf_token %}
-    {{ form }}
+    {{ activeSigForm }}
     <input type="submit" value="Update Registry" />
+  </form>
+  <form action="{% url 'addNewSignal' %}" method="post">
+    {% csrf_token %}
+    {{ addNewSigForm }}
+    <input type="submit" value="Add New Signal" />
   </form>
 {% else %}
     <p>No signals are registered.</p>
