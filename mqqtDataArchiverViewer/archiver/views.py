@@ -33,4 +33,4 @@ def updateRegistry(request):
     return HttpResponseRedirect('/archiver')
 
 def addNewSignal(request):
-    return HttpResponse("Placeholder for addition of a new signal.")
+    return HttpResponse(request.POST.get('newsig'))
