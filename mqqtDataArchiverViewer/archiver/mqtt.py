@@ -2,6 +2,9 @@ import json
 import paho.mqtt.client as mqtt
 from django.utils import timezone
 
+class DBconnectedMQTTClient(mqtt.Client):
+    pass
+
 def startMQTT():
     with open('itsmqttbroker.dat', 'r') as brokerFile:
         jsonBrokerObj = json.load(brokerFile)
@@ -11,7 +14,7 @@ def startMQTT():
     userKey = jsonBrokerObj['secret'].encode()
     brokertimeout = 60
 
-    client = mqtt.Client(
+    client = DBconnectedMQTTClient(
         client_id = "ExperimentalArchiver",
         clean_session = False,
         userdata = None)
