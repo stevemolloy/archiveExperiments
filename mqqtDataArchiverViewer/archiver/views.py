@@ -12,7 +12,7 @@ def index(request):
     return render(request, 'archiver/index.html', context)
 
 def signalDetail(request, signal_id):
-    return HttpResponse("Some details about signal #{}".format(signal_id))
+    return HttpResponse("This should show a time-series plot of signal #{}".format(signal_id))
 
 def updateRegistry(request):
     newRegistrySettings = [int(i) for i in request.POST.getlist('choices')]
