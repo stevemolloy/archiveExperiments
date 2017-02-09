@@ -7,6 +7,12 @@ class ArchiverConfig(AppConfig):
     name = 'archiver'
 
     def ready(self):
+        from .models import registry
         client = startMQTT()
-
         client.loop_start()
+
+        self.subscribedSigs = (sig.signal for sig in registry.objects.all() if sig.archival_active)
+        for sig in self.subscribedSigs:
+            client.subscribe(sig)
+
+        self.client = client
