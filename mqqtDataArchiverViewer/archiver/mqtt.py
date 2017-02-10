@@ -11,8 +11,12 @@ def updateSubscriptions():
     from django.apps import apps
     appconfig = apps.get_app_config('archiver')
     while True:
-        subscribedSigs = (str(sig.signal) for sig in registry.objects.all() if sig.archival_active)
-        unsubscribedSigs = (str(sig.signal) for sig in registry.objects.all() if not sig.archival_active)
+        subscribedSigs = (str(sig.signal)
+                for sig in registry.objects.all()
+                if sig.archival_active)
+        unsubscribedSigs = (str(sig.signal)
+                for sig in registry.objects.all()
+                if not sig.archival_active)
         for sig in subscribedSigs:
             appconfig.client.subscribe(sig)
         for sig in unsubscribedSigs:
