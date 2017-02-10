@@ -56,3 +56,8 @@ class RFPowerMeter(models.Model):
     input1 = models.FloatField()
     input2 = models.FloatField()
     timestamp = models.DateTimeField()
+
+class NewArchiveSignal(models.Model):
+    signal = models.CharField(max_length = 150)
+    sampleCapture = models.CharField(max_length = 512)
+    timestamp = models.DateTimeField()
