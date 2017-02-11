@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-from .models import registry
+from .models import registry, NewArchiveSignal
 from .forms import ActiveSignalForm, AddNewSignalForm
 from django.utils import timezone
 
@@ -36,4 +36,12 @@ def updateRegistry(request):
 def addNewSignal(request):
     from django.apps import apps
     appconfig = apps.get_app_config('archiver')
+    newSig = request.POST.get('newsig')
+
+    def callback(client, userdata, message):
+        # NewArchiveSignal().save()
+        pass
+
+    # appconfig.client.subscribe(newSig)
+
     return HttpResponse(request.POST.get('newsig'))
