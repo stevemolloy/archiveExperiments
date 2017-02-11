@@ -22,7 +22,14 @@ class DBconnectedMQTTClient(mqtt.Client):
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
+            from .models import registry
             print "Connected!"
+            subscribedSigs = (
+                str(sig.signal)
+                for sig in registry.objects.filter(archival_active = True)
+                )
+            for sig in subscribedSigs:
+                client.subscribe(sig)
         else:
             print "Connection failed"
 
