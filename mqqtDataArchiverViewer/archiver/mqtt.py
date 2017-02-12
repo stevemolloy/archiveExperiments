@@ -1,6 +1,7 @@
 import json
 import time
 import paho.mqtt.client as mqtt
+from threading import Thread
 from django.utils import timezone
 
 def subscribedSigsInDB():
@@ -18,6 +19,17 @@ def unsubscribedSigsInDB():
         for sig in registry.objects.filter(archival_active = False)
         )
     return sigs
+
+def updateSubscriptions():
+    from .models import registry
+    from django.apps import apps
+    appconfig = apps.get_app_config('archiver')
+    while True:
+        for sig in subscribedSigsInDB():
+            appconfig.client.subscribe(sig)
+        for sig in unsubscribedSigsInDB():
+            appconfig.client.unsubscribe(sig)
+        time.sleep(1)
 
 class DBconnectedMQTTClient(mqtt.Client):
     def __init__(self, *args, **kwargs):
@@ -44,17 +56,6 @@ class DBconnectedMQTTClient(mqtt.Client):
                 client.subscribe(sig)
         else:
             print "Connection failed"
-
-def updateSubscriptions():
-    from .models import registry
-    from django.apps import apps
-    appconfig = apps.get_app_config('archiver')
-    while True:
-        for sig in subscribedSigsInDB():
-            appconfig.client.subscribe(sig)
-        for sig in unsubscribedSigsInDB():
-            appconfig.client.unsubscribe(sig)
-        time.sleep(1)
 
 def startMQTT():
     with open('itsmqttbroker.dat', 'r') as brokerFile:
