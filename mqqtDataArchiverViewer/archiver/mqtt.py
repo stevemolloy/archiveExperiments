@@ -1,27 +1,61 @@
 import json
 import time
 import paho.mqtt.client as mqtt
+from threading import Thread
 from django.utils import timezone
 
-class DBconnectedMQTTClient(mqtt.Client):
-    pass
+def subscribedSigsInDB():
+    from .models import registry
+    sigs = (
+        str(sig.signal)
+        for sig in registry.objects.filter(archival_active = True)
+        )
+    return sigs
+
+def unsubscribedSigsInDB():
+    from .models import registry
+    sigs = (
+        str(sig.signal)
+        for sig in registry.objects.filter(archival_active = False)
+        )
+    return sigs
 
 def updateSubscriptions():
     from .models import registry
     from django.apps import apps
     appconfig = apps.get_app_config('archiver')
     while True:
-        subscribedSigs = (str(sig.signal)
-                for sig in registry.objects.all()
-                if sig.archival_active)
-        unsubscribedSigs = (str(sig.signal)
-                for sig in registry.objects.all()
-                if not sig.archival_active)
-        for sig in subscribedSigs:
+        for sig in subscribedSigsInDB():
             appconfig.client.subscribe(sig)
-        for sig in unsubscribedSigs:
+        for sig in unsubscribedSigsInDB():
             appconfig.client.unsubscribe(sig)
         time.sleep(1)
+
+class DBconnectedMQTTClient(mqtt.Client):
+    def __init__(self, *args, **kwargs):
+        self.subscriptions = set()
+        return super(DBconnectedMQTTClient, self).__init__(*args, **kwargs)
+
+    def subscribe(self, topic):
+        if not topic in self.subscriptions:
+            self.subscriptions.add(topic)
+            print self.subscriptions
+            return super(DBconnectedMQTTClient, self).subscribe(topic)
+
+    def unsubscribe(self, topic):
+        if topic in self.subscriptions:
+            self.subscriptions.remove(topic)
+            print self.subscriptions
+            return super(DBconnectedMQTTClient, self).unsubscribe(topic)
+
+    def on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            from .models import registry
+            print "Connected!"
+            for sig in subscribedSigsInDB():
+                client.subscribe(sig)
+        else:
+            print "Connection failed"
 
 def startMQTT():
     with open('itsmqttbroker.dat', 'r') as brokerFile:
@@ -37,16 +71,12 @@ def startMQTT():
         clean_session = False,
         userdata = None)
 
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print "Connected!"
-        else:
-            print "Connection failed"
-
     def on_message(client, userdata, msg):
         from .models import registry
-        registeredSigs = (sig.signal for sig in registry.objects.all()
-                                if sig.archival_active)
+        registeredSigs = (
+            str(sig.signal)
+            for sig in registry.objects.filter(archival_active = True)
+            )
         if not msg.topic in registeredSigs:
             return
         if 'itsPowerMeter01/get' in msg.topic:
@@ -74,7 +104,10 @@ def startMQTT():
             from .models import cpm
             ts = timezone.now()
             jsonPayload = json.loads(msg.payload)
-            cpm(measured_val = int(jsonPayload['cpmGet']), timestamp = ts).save()
+            cpm(
+                measured_val = int(jsonPayload['cpmGet']),
+                timestamp = ts,
+                ).save()
 
         if 'itsWaterSystem/get' in msg.topic:
             from .models import KlystronBodyWaterSystem
@@ -110,7 +143,6 @@ def startMQTT():
                     timestamp = ts,
                     ).save()
 
-    client.on_connect = on_connect
     client.on_message = on_message
     client.username_pw_set(userName, userKey)
     client.connect(

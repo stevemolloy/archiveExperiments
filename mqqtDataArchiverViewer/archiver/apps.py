@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.apps import AppConfig
 from threading import Thread
-from .mqtt import startMQTT,  updateSubscriptions
+from .mqtt import startMQTT, updateSubscriptions
 
 class ArchiverConfig(AppConfig):
     name = 'archiver'
