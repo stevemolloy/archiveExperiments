@@ -138,7 +138,6 @@ def startMQTT():
                     timestamp = ts,
                     ).save()
 
-    # client.on_connect = on_connect
     client.on_message = on_message
     client.username_pw_set(userName, userKey)
     client.connect(
