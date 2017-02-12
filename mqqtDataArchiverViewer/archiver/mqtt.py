@@ -3,6 +3,22 @@ import time
 import paho.mqtt.client as mqtt
 from django.utils import timezone
 
+def subscribedSigsInDB(self):
+    from .models import registry
+    sigs = (
+        str(sig.signal)
+        for sig in registry.objects.filter(archival_active = True)
+        )
+    return sigs
+
+def unsubscribedSigsInDB(self):
+    from .models import registry
+    sigs = (
+        str(sig.signal)
+        for sig in registry.objects.filter(archival_active = False)
+        )
+    return sigs
+
 class DBconnectedMQTTClient(mqtt.Client):
     def __init__(self, *args, **kwargs):
         self.subscriptions = set()
@@ -24,11 +40,7 @@ class DBconnectedMQTTClient(mqtt.Client):
         if rc == 0:
             from .models import registry
             print "Connected!"
-            subscribedSigs = (
-                str(sig.signal)
-                for sig in registry.objects.filter(archival_active = True)
-                )
-            for sig in subscribedSigs:
+            for sig in subscribedSigsInDB():
                 client.subscribe(sig)
         else:
             print "Connection failed"
