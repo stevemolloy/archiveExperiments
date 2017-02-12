@@ -3,7 +3,7 @@ import time
 import paho.mqtt.client as mqtt
 from django.utils import timezone
 
-def subscribedSigsInDB(self):
+def subscribedSigsInDB():
     from .models import registry
     sigs = (
         str(sig.signal)
@@ -11,7 +11,7 @@ def subscribedSigsInDB(self):
         )
     return sigs
 
-def unsubscribedSigsInDB(self):
+def unsubscribedSigsInDB():
     from .models import registry
     sigs = (
         str(sig.signal)
@@ -50,17 +50,9 @@ def updateSubscriptions():
     from django.apps import apps
     appconfig = apps.get_app_config('archiver')
     while True:
-        subscribedSigs = (
-            str(sig.signal)
-            for sig in registry.objects.filter(archival_active = True)
-            )
-        unsubscribedSigs = (
-            str(sig.signal)
-            for sig in registry.objects.filter(archival_active = False)
-            )
-        for sig in subscribedSigs:
+        for sig in subscribedSigsInDB():
             appconfig.client.subscribe(sig)
-        for sig in unsubscribedSigs:
+        for sig in unsubscribedSigsInDB():
             appconfig.client.unsubscribe(sig)
         time.sleep(1)
 
